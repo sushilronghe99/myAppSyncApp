@@ -1,0 +1,24 @@
+{
+    "version" : "2018-05-29",
+    "operation" : "UpdateItem",
+    "key": {
+        "pk" : {"S" : "user_$ctx.identity.username"},
+        "sk" : {"S" : "$ctx.args.input.id" },
+        
+    },
+    "condition": {
+        "expression": "attribute_exists(pk)"
+    },
+    "update" : {
+        "expression" : "SET #done = :done",
+        "expressionNames" : {
+           "#done" : "done"
+       },
+       "expressionValues" : {
+           ":done" : { "BOOL": true}
+       },
+     
+    },
+    
+    
+}

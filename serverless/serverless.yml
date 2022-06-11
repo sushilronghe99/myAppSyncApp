@@ -1,0 +1,216 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: myappsyncapp
+plugins:
+  - serverless-appsync-plugin
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: '3'
+
+
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: ap-south-1
+
+  environment:
+    
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource:
+        -  Fn::GetAtt: [ MyDB, Arn ]
+        -  Fn::Join:
+            - "/"
+            - - Fn::GetAtt: [MyDB, Arn]
+              - "index/*"
+
+
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+
+custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or fallsback to what we have set in the provider section.
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+  AWSID: 713596227692 
+
+  appSync:
+    name: MyAppSync-${opt:stage, self:provider.stage}
+    authenticationType: AMAZON_COGNITO_USER_POOLS
+    userPoolConfig:
+      userPoolId: { Ref: MyAppSyncCognitoUserPool }
+      defaultAction: ALLOW
+    schema: ./appsync/schema.graphql
+    dataSources:
+      - type: AMAZON_DYNAMODB
+        name: My_dynamodb
+        config:
+          tableName: { Ref: MyDB }
+          serviceRoleArn: { Fn::GetAtt: [MyAppSyncDataRole, Arn] }
+      - type: AWS_LAMBDA
+        name: lambda_resolver
+        config:
+          functionName: MyResolver
+          serviceRoleArn: { Fn::GetAtt: [MyAppSyncDataRole, Arn] }
+    mappingTemplatesLocation: ./appsync/mapping-templates
+    mappingTemplates:
+      # Queries
+      - dataSource: My_dynamodb
+        type: Query
+        field: getTodoByID
+        request: gettodo/request.vtl
+        response: results.vtl
+      - dataSource: My_dynamodb
+        type: Mutation
+        field: updateTodo
+        request: updatetodo/request.vtl
+        response: results.vtl
+      - dataSource: lambda_resolver
+        type: Mutation
+        field: createTodo
+        request: createtodo/request.vtl
+        response: results.vtl
+     
+  
+
+functions:
+  MyResolver:
+    handler: ./bin/resolver
+    package:
+      patterns:
+        - ./bin/resolver
+    environment:
+      SERVICES_DATA_TABLE_NAME: !Ref MyDB
+      
+resources:
+
+  Resources:
+      MyAppSyncCognitoUserPool:
+        Type: AWS::Cognito::UserPool
+        Properties:
+          UserPoolName: MyAppSync_${opt:stage, self:provider.stage}_user_pool
+          Schema:
+            - Name: email
+              AttributeDataType: String
+              Mutable: true
+              Required: true
+          Policies:
+            PasswordPolicy:
+              MinimumLength: 8
+              RequireLowercase: false
+              RequireNumbers: false
+              RequireSymbols: false
+              RequireUppercase: false
+          UsernameAttributes:
+            - email
+          MfaConfiguration: "OFF"
+
+      MyAppSyncCognitoUserPoolDomain:
+        Type: AWS::Cognito::UserPoolDomain
+        Properties:
+          Domain: ${self:service}-${opt:stage, self:provider.stage}
+          UserPoolId: !Ref MyAppSyncCognitoUserPool
+
+      
+
+      
+      # provides the custom allowed OauthScope to the user pool client
+      UserPoolResourceServer:
+        Type: AWS::Cognito::UserPoolResourceServer
+        Properties:
+          Identifier: myID
+          Name: GraphQL API
+          UserPoolId: !Ref MyAppSyncCognitoUserPool
+          Scopes:
+            - ScopeName: "read"
+              ScopeDescription: "Read access"
+    
+      
+      MyDB:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          TableName: MyAppSync-${opt:stage, self:provider.stage}
+          AttributeDefinitions:
+            - AttributeName: pk
+              AttributeType: S
+            - AttributeName: sk
+              AttributeType: S
+          
+          KeySchema:
+            - AttributeName: pk
+              KeyType: HASH
+            - AttributeName: sk
+              KeyType: RANGE
+          # Set the capacity to auto-scale
+          BillingMode: PAY_PER_REQUEST
+      MyAppSyncDataRole:
+        Type: "AWS::IAM::Role"
+        Properties:
+          RoleName: "${self:service}-${opt:stage, self:provider.stage}-MyAppSync-data-role"
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Principal:
+                  Service:
+                    - "appsync.amazonaws.com"
+                Action:
+                  - "sts:AssumeRole"
+          Policies:
+            - PolicyName: "${self:service}-${opt:stage, self:provider.stage}-MyAppSync-policy"
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: "Allow"
+                    Action:
+                      - "dynamodb:Query"
+                      - "dynamodb:BatchWriteItem"
+                      - "dynamodb:GetItem"
+                      - "dynamodb:DeleteItem"
+                      - "dynamodb:PutItem"
+                      - "dynamodb:Scan"
+                      - "dynamodb:UpdateItem"
+                    Resource:
+                      - Fn::GetAtt: [MyDB, Arn]
+                      - Fn::Join:
+                          - "/"
+                          - - Fn::GetAtt: [MyDB, Arn]
+                            - "index/*"
+                  - Effect: "Allow"
+                    Action:
+                      - "lambda:InvokeFunction"
+                    Resource:
+                      - !Sub "arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-MyResolver"
+    
