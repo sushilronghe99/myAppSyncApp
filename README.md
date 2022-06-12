@@ -93,7 +93,7 @@ type Mutation {
 ```
 #DataBase resolver 
   
-The Query GetTodo use the Data resolver. The request is as follows (request.vtl) 
+The Query GetTodo use the DynamoDB resolver. The request is as follows (request.vtl) 
 ```
   {
    "version" : "2017-02-28",
@@ -104,7 +104,7 @@ The Query GetTodo use the Data resolver. The request is as follows (request.vtl)
     }
 }
 ```
-The Mutation Update Todo also useses the Data resolver. The request is as follows. (request.vtl)
+The Mutation Update Todo also use the DynamoDB resolver. The request is as follows. (request.vtl)
 ```
 {
     "version" : "2018-05-29",
