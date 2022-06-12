@@ -17,7 +17,7 @@ Install the serverless framework using npm and configure it to use your aws acco
 Npm install -g serverless 
 serverless config credentials --provider aws --key <access key ID> --secret <secret access key>
 
-Following  serverless plugins are required for appsync (more details on their github page). No need to install this plugin just run npm install. 
+Following  serverless plugins are required for appsync (more details on their github page). No need to install this plugin just run *npm install* 
 
 npm install serverless-appsync-plugin --save-dev
 
