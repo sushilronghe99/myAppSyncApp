@@ -2,8 +2,7 @@
    "version" : "2017-02-28",
     "operation": "GetItem",
     "key": {
-      "pk": {"S": "$ctx.args.id" },
-      "sk": { "S": "user_$ctx.args.userid" }
+      "pk": {"S": "user_$ctx.identity.username" },
+      "sk": { "S": "$ctx.args.id" }
     }
-  
 }

@@ -8,55 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
-/* ID                string      `json:"id"`
-Email             string      `json:"email"`
-OrderStatus       OrderStatus `json:"orderStatus"`
-FirstName         string     `json:"firstName"`
-LastName          string     `json:"lastName"`
-PrescriberAddress string     `json:"prescriberAddress"`
-DeliveryAddress   string     `json:"deliveryAddress"`
-ExtraDetails      string     `json:"extraDetails"`
-FutureOrderDate   string     `json:"futureOrderDate"`
-PaymentAmount     string     `json:"paymentAmount"`
-BrainTreeID       string      `json:"brainTreeId"`  How come this is presnt at the time of crating order ??*/
-
-// CreateAppointment create a course and the first appointment.
-
-/*
-
-{
-    "id": "order-user_b944efb2-466f-4f17-8fd9-380dbacf12831652100469",
-    "email": "ronghester@gmail.com",
-    "orderStatus": "preparing",
-    "orderItems": [
-        {
-            "brandDesc": "Complete Blink-N-Clean lens drops",
-            "prodDesc": "Complete Blink-N-Clean lens drops (AMO UK Ltd)",
-            "drugName": "Complete Blink-N-Clean lens drops (AMO UK Ltd)",
-            "variantName": "Complete Blink-N-Clean lens drops",
-            "vtmId": "",
-            "vmpId": "10748911000001102",
-            "packages": null,
-            "isRestricted": false,
-            "form": "Other",
-            "ingredients": [],
-            "iq": "",
-            "isDiscontinued": false,
-            "ampId": "10734211000001104",
-            "barcodes": null,
-            "quantity": 1
-        }
-    ],
-    "prescriberAddress": ", Shap Health Centre, Peggy Nut Croft, Penrith, CA10 3LW",
-    "deliveryAddress": "20 Concord Way, undefined, Dukinfield, SK16 4DB",
-    "extraDetails": "",
-    "futureOrderDate": "2022-05-17T12:48:00.000Z",
-    "freeDisposable": true,
-    "paymentAmount": null,
-    "brainTreeId": null
-}
-*/
-
 func (s Store) CreateTodoDB(in appsync.NewTodo) (out appsync.Todo, err error) {
 
 	id := s.generateID()

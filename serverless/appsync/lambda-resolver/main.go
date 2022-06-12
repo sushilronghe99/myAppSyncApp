@@ -11,7 +11,7 @@ import (
 )
 
 type configuration struct {
-	TableName string `env:"SERVICES_DATA_TABLE_NAME"`
+	TableName string `env:"DATA_TABLE_NAME"`
 }
 
 func main() {

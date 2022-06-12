@@ -36,7 +36,7 @@ func NewGraphQLRouter(
 // Route routes graphql requests to golang code.
 func (g GraphQLRouter) Route(ctx context.Context, req Event) (res interface{}, err error) {
 
-	fmt.Printf(" args for req %+v", req)
+	fmt.Printf(" Request data received:  %+v", req)
 	appError := fmt.Errorf("Default error")
 	switch req.Field {
 	// You can add multiple switch statements to handle each field
@@ -57,16 +57,8 @@ func (g GraphQLRouter) Route(ctx context.Context, req Event) (res interface{}, e
 	case "createtodo":
 		var args appsync.NewTodo
 
-		fmt.Println(" -- ")
-		fmt.Printf(" Input is %+v", req.Arguments["input"])
-		fmt.Println("--")
-
 		mapstructure.Decode(req.Arguments["input"], &args)
-		//fmt.Printf(" Error in decoding %+v", err)
-		fmt.Printf(" args %+v", args)
-
-		fmt.Printf(" Identify %+v", req.Identity)
-
+		//Add identify to the object
 		args.UserID = req.Identity
 		res, appError = g.TodoInterface.CreateTodoDB(args)
 

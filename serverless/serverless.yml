@@ -28,7 +28,7 @@ provider:
   name: aws
   runtime: go1.x
   stage: dev
-  region: ap-south-1
+  region: <enter region here>
 
   environment:
     
@@ -64,7 +64,7 @@ custom:
   # commands. Or fallsback to what we have set in the provider section.
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
-  AWSID: 713596227692 
+  AWSID: <enter you awsID> 
 
   appSync:
     name: MyAppSync-${opt:stage, self:provider.stage}
@@ -112,7 +112,7 @@ functions:
       patterns:
         - ./bin/resolver
     environment:
-      SERVICES_DATA_TABLE_NAME: !Ref MyDB
+      DATA_TABLE_NAME: !Ref MyDB
       
 resources:
 
