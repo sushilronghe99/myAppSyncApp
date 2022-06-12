@@ -1,6 +1,8 @@
 # Serverless directories
 .serverless
-
+node_modules
+hello
+world
 # golang output binary directory
 bin
 
