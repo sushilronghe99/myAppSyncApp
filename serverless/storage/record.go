@@ -5,6 +5,8 @@ import (
 	"myAppSyncApp-API/serverless/appsync"
 )
 
+//Just record is defined here. The object are stored by appending the require record. 
+//If you need more GSI then add them to the record - so we can validate it before saving to DB.
 type recordKey struct {
 	PK string `json:"pk"`
 	SK string `json:"sk"`

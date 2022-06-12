@@ -23,7 +23,7 @@ func generateID() string {
 
 func NewStore(tableName string) Store {
 	return NewCustomStore(
-		dynamodb.New(session.Must(session.NewSession())), //GetLocalAWSSession()),
+		dynamodb.New(session.Must(session.NewSession())), 
 		tableName,
 		time.Now,
 		generateID,
